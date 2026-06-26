@@ -33,7 +33,9 @@
 ])
 
 <div class="bg-white rounded-xl shadow overflow-hidden">
-
+    <div class="p-4 border-b flex justify-end">
+        <input type="text" placeholder="Search region..." class="border rounded-lg px-3 py-2 w-64">
+    </div>
     {{-- CARD HEADER --}}
     @if($title || isset($actions))
     <div class="p-4 border-b flex flex-wrap items-center justify-between gap-3">

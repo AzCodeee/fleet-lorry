@@ -19,7 +19,7 @@
                 <th class="p-3 text-right font-semibold text-gray-700">Action</th>
             </x-slot>
 
-            @forelse($regions ?? [] as $region)
+            @forelse($regions as $region)
             <tr class="border-t hover:bg-gray-50">
                 <td class="p-3 font-medium text-gray-900">{{ $region->name }}</td>
                 <td class="p-3 font-mono text-xs font-bold">{{ $region->code }}</td>
@@ -28,9 +28,9 @@
                         {{ $region->sites_count ?? $region->sites->count() }} sites
                     </span>
                 </td>
-                <td class="p-3 text-sm text-gray-500">{{ $region->created_at?->format('d M Y') }}</td>
+                <td class="p-3 text-sm text-gray-500">{{ $region->created_at ? \Carbon\Carbon::parse($region->created_at)->format('d M Y') : '—' }}</td>
                 <td class="p-3 text-right">
-                    <x-btn href="{{ route('regions.show', $region) }}" type="outline" size="sm" icon="eye" />
+                    <x-btn href="{{ route('regions.show', $region->id) }}" type="secondary" size="" icon="eye" />
                 </td>
             </tr>
             @empty
@@ -65,7 +65,6 @@
                 </form>
             </x-slot>
             <x-slot name="footer">
-                <x-btn type="secondary" @click="open = false">Cancel</x-btn>
                 <x-btn type="primary" @click="document.getElementById('addRegionForm').submit()">Add Region</x-btn>
             </x-slot>
         </x-offcanvas>

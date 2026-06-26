@@ -19,7 +19,7 @@ class HttpClient
     {
         $access_token_session = Session::get('ACCESS_TOKEN');
         $access_token = isset(Auth::user()->access_token) ? Auth::user()->access_token : $access_token_session;
-        dd(Auth::user());
+
         if (empty($access_token)) {
             if (isset($_COOKIE['access_token']) && !empty($_COOKIE['access_token'])) {
                 $controller   = new Controller;

@@ -28,9 +28,9 @@ class RegionController extends Controller
         $query_string   = Http_build_query($query_params);
         $url            = (!empty($query_string) ? "{$this->api_module}?{$query_string}" : "$this->api_module");
         $response       = json_decode(HttpClient::request('get', $url)->getContent());
-        $region    = HttpClient::paginate($response->data, $response->meta->total, $response->meta->per_page, $response->meta->current_page);
-
-        return view('regions.index', compact('region'));
+        $regions    = HttpClient::paginate($response->data, $response->meta->total, $response->meta->per_page, $response->meta->current_page);
+    
+        return view('regions.index', compact('regions'));
     }
 
     public function create(Request $request)
