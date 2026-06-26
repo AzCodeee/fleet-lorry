@@ -32,8 +32,8 @@
                  alt="Avatar"
                  onerror="this.src='https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->name ?? 'User') }}&background=6366f1&color=fff'">
             <div class="text-sm text-left hidden sm:block">
-                <div class="font-medium">{{ auth()->user()->name ?? 'Admin' }}</div>
-                <div class="text-gray-500 text-xs">{{ auth()->user()->email ?? 'admin@fleet.com' }}</div>
+                <div class="font-medium">{{ auth()->user()->name ?? 'test' }}</div>
+                <div class="text-gray-500 text-xs">{{ auth()->user()->email ?? 'test@fleet.com' }}</div>
             </div>
         </button>
 

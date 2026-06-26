@@ -8,6 +8,8 @@
         || request()->routeIs('lorries.*')
         || request()->routeIs('regions.*')
         || request()->routeIs('sites.*');
+
+    $settingsOpen = $isSettings ? 'true' : 'false';
 @endphp
 
 <aside :class="sidebar ? 'translate-x-0' : '-translate-x-full'"
@@ -17,7 +19,7 @@
     {{-- LOGO --}}
     <div class="p-4 border-b flex items-center justify-between">
         <a href="{{ route('dashboard') }}">
-            <img src="{{ asset('images/logo.jpeg') }}" class="h-20 object-contain" alt="Logo">
+            <img src="{{ asset('images/logo.jpeg') }}" class="h-24 object-contain" alt="Logo">
         </a>
         <button class="lg:hidden text-gray-500 hover:text-black" @click="sidebar = false">✕</button>
     </div>
@@ -58,7 +60,7 @@
         </a>
 
         {{-- Settings (collapsible) --}}
-        <div x-data="{ open: {{ $isSettings ? 'true' : 'false' }} }" class="space-y-1">
+        <div x-data="{ open: {{ $settingsOpen }} }" class="space-y-1">
 
             <button @click="open = !open"
                     class="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white hover:shadow transition

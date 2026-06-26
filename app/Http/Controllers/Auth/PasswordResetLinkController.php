@@ -2,12 +2,11 @@
 
 namespace App\Http\Controllers\Auth;
 
-use GuzzleHttp\Client;
-use Illuminate\View\View;
-use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Password;
+use Illuminate\View\View;
+use App\Http\Controllers\Controller;
 
 class PasswordResetLinkController extends Controller
 {
@@ -21,42 +20,25 @@ class PasswordResetLinkController extends Controller
 
     /**
      * Handle an incoming password reset link request.
+     * Method must be named 'store' to match the route in routes/auth.php.
      *
      * @throws \Illuminate\Validation\ValidationException
      */
-
-    public function sendResetLinkEmail(Request $request): RedirectResponse
+    public function store(Request $request): RedirectResponse
     {
         $request->validate([
             'email' => ['required', 'email'],
         ]);
 
-        $client = new Client([
-            'base_uri' => env('API_CLIENT_URL'),
-            'headers'  => [
-                'Content-Type' => 'application/json',
-                'Accept'       => 'application/json',
-            ],
-            'http_errors' => false,
-        ]);
+        // Use Laravel's built-in password broker (uses password_reset_tokens table).
+        // It will send the reset email automatically.
+        $status = Password::sendResetLink(
+            $request->only('email')
+        );
 
-        $data = [
-            "email"  => $request->input('email'),
-            "source" => 'atlas'
-        ];
-
-        $url              = "/api/v1/atlas/login/password-reset-link";
-        $response         = $client->post($url, ['json' => $data]);
-        $http_status_code = $response->getStatusCode();
-
-        if ($http_status_code == 200) {
-            flash("The Reset Link has been sent to your email. Check your email.")->success();
-            return redirect()->route('login');
-        } elseif ($http_status_code == 422) {
-            $message = json_decode($response->getBody()->getContents(), true);
-            return back()->withInput()->withErrors(['email' => $message['message'] ?? 'Invalid request']);
-        } else {
-            return back()->withInput()->withErrors(['email' => 'Whoops, something went wrong. Error Code: ' . $http_status_code]);
-        }
+        return $status == Password::RESET_LINK_SENT
+            ? back()->with('status', __($status))
+            : back()->withInput($request->only('email'))
+                    ->withErrors(['email' => __($status)]);
     }
 }

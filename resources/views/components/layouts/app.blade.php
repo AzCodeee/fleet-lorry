@@ -45,7 +45,7 @@
         <x-header :pageTitle="$pageTitle ?? 'Fleet Management System'" />
 
         {{-- PAGE CONTENT --}}
-        <main class="pt-20 p-4 lg:p-6">
+        <main class="p-6 pt-20 space-y-6">
             {{ $slot }}
 
             <footer class="mt-10 text-xs text-gray-500 border-t pt-4">

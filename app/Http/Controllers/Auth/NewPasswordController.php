@@ -2,99 +2,56 @@
 
 namespace App\Http\Controllers\Auth;
 
-use GuzzleHttp\Client;
-use Illuminate\View\View;
-use Illuminate\Support\Str;
-use Illuminate\Http\Request;
-use Illuminate\Validation\Rules;
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Facades\Password;
 use Illuminate\Auth\Events\PasswordReset;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Str;
+use Illuminate\Validation\Rules;
+use Illuminate\View\View;
 
 class NewPasswordController extends Controller
 {
     /**
      * Display the password reset view.
      */
-    public function create(Request $request)
+    public function create(Request $request): View
     {
-        $token = $request->route()->parameter('token');
-
-        return view('auth.reset-password')->with(
-            ['token' => $token, 'email' => $request->email]
-        );
+        return view('auth.reset-password', ['request' => $request]);
     }
 
     /**
      * Handle an incoming new password request.
+     * Method must be named 'store' to match the route in routes/auth.php.
      *
      * @throws \Illuminate\Validation\ValidationException
      */
-    public function reset(Request $request)
+    public function store(Request $request): RedirectResponse
     {
         $request->validate([
-            'password' => 'required|string|min:12|confirmed',
+            'token'    => ['required'],
+            'email'    => ['required', 'email'],
+            'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
-        $password = $request->input('password');
+        // Use Laravel's built-in password broker to reset the password.
+        $status = Password::reset(
+            $request->only('email', 'password', 'password_confirmation', 'token'),
+            function ($user) use ($request) {
+                $user->forceFill([
+                    'password'       => Hash::make($request->password),
+                    'remember_token' => Str::random(60),
+                ])->save();
 
-        $errors = [];
+                event(new PasswordReset($user));
+            }
+        );
 
-        // Check each condition manually
-        if (!preg_match('/[A-Z]/', $password)) {
-            $errors[] = 'The password must include at least one uppercase letter.';
-        }
-
-        if (!preg_match('/[a-z]/', $password)) {
-            $errors[] = 'The password must include at least one lowercase letter.';
-        }
-
-        if (!preg_match('/\d/', $password)) {
-            $errors[] = 'The password must include at least one digit.';
-        }
-
-        if (!preg_match('/[\W_]/', $password)) {
-            $errors[] = 'The password must include at least one special character.';
-        }
-
-        if (!empty($errors)) {
-            return back()->withErrors(['password' => $errors]);
-        }
-
-
-        $client = new Client([
-            'base_uri'=> env('API_CLIENT_URL'),
-            'headers' => [
-                'Content-Type'  => 'application/json',
-                'Accept'        => 'application/json'
-            ],
-            'http_errors'       => false
-        ]);
-
-        $data = [
-            "hash_value"            => $request->input('token'),
-            "password"              => $request->input('password'),
-            "password_confirmation" => $request->input('password_confirmation'),
-        ];
-
-        $url                = "/api/v1/atlas/login/password-reset";
-        $response           = $client->request('post', $url, ['json' => $data]);
-        $http_status_code   = $response->getStatusCode();
-
-        if ($http_status_code == 200) {
-            flash()->success('The password had been reset. Please Proceed to Login.');
-            return redirect()->route('login');
-        } elseif($http_status_code == 422) {
-            $message = json_decode($response->getBody()->getContents());
-            flash()->warning($message->message);
-            return back()->withInput();
-        } else {
-            flash('Whoops something went wrong. Error Code: '. $http_status_code)->error();
-            return back()->withInput();
-        }
-
+        return $status == Password::PASSWORD_RESET
+            ? redirect()->route('login')->with('status', __($status))
+            : back()->withInput($request->only('email'))
+                    ->withErrors(['email' => __($status)]);
     }
-
 }

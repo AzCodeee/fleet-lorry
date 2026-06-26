@@ -100,28 +100,37 @@
 
     @push('scripts')
     <script>
-    const revenueData = @json($revenueChart ?? ['labels' => ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'], 'data' => [0,0,0,0,0,0,0]]);
+    const ctx = document.getElementById('revenueChart');
 
-    new Chart(document.getElementById('revenueChart'), {
+    new Chart(ctx, {
         type: 'line',
         data: {
-            labels: revenueData.labels,
+            labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
             datasets: [{
-                label: 'Revenue (RM)',
-                data: revenueData.data,
-                borderColor: '#16a34a',
-                backgroundColor: 'rgba(22,163,74,0.08)',
+                label: 'Revenue',
+                data: [12000, 19000, 15000, 22000, 18000, 26000, 24000],
                 borderWidth: 2,
-                tension: 0.4,
-                fill: true,
+                tension: 0.4
             }]
         },
         options: {
             responsive: true,
-            plugins: { legend: { display: false } },
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
             scales: {
-                x: { grid: { display: false } },
-                y: { grid: { color: '#eee' } }
+                x: {
+                    grid: {
+                        display: false
+                    }
+                },
+                y: {
+                    grid: {
+                        color: "#eee"
+                    }
+                }
             }
         }
     });
